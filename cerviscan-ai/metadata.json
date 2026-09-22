@@ -1,0 +1,6 @@
+{
+  "name": "Cerviscan AI",
+  "description": "Enterprise cervical cancer AI screening, patient EHR directory, and specialist diagnostic validation workstation.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,682 @@
+import { Patient, AIScanResult, AuditLogEntry } from '../types/patient';
+
+export const INITIAL_HOSPITALS = [
+  'All Branches (National Registry)',
+  'Hospital Kuala Lumpur (HKL)',
+  'Klinik Kesihatan LPPKN',
+  'Pusat Perubatan Universiti Malaya (PPUM)',
+  'Hospital Sultanah Aminah JB',
+  'Hospital Pulau Pinang',
+];
+
+export const INITIAL_PATIENTS: Patient[] = [
+  {
+    id: 'PAT-2026-8841',
+    icNumber: '880315-10-5432',
+    fullName: 'Nurul Aisyah binti Razak',
+    age: 38,
+    assignedHospital: 'Hospital Kuala Lumpur (HKL)',
+    lastScreeningDate: '2026-09-18',
+    overallRisk: 'HIGH_RISK',
+    aiConfidenceScore: 94.2,
+    status: 'Requires Biopsy',
+    hpvDnaResult: 'HPV 16+',
+    gravidaPara: 'G3P2',
+    ethnicity: 'Malay',
+    phone: '+60 12-384 9912',
+    email: 'nurul.aisyah.r@gmail.com',
+    clinicalNotesSummary: 'Post-coital intermenstrual spotting x 3 months. HPV 16 positive on routine LPPKN screening. Cervix shows visible dense acetowhite region near squamocolumnar junction.',
+    papSmearHistory: [
+      { id: 'PAP-01', date: '2026-08-10', result: 'HSIL (High-grade Squamous)', facility: 'Klinik Kesihatan LPPKN', cytotechnologist: 'Dr. Zuraida' },
+      { id: 'PAP-02', date: '2024-03-12', result: 'ASC-US', facility: 'Hospital Kuala Lumpur (HKL)', cytotechnologist: 'Dr. Wong K.L.' },
+      { id: 'PAP-03', date: '2021-05-19', result: 'NILM (Negative for Intraepithelial Lesion)', facility: 'Klinik Kesihatan Cheras', cytotechnologist: 'Dr. Amira' }
+    ]
+  },
+  {
+    id: 'PAT-2026-8842',
+    icNumber: '920724-14-6120',
+    fullName: 'Tan Wei Ling',
+    age: 34,
+    assignedHospital: 'Pusat Perubatan Universiti Malaya (PPUM)',
+    lastScreeningDate: '2026-09-20',
+    overallRisk: 'HIGH_RISK',
+    aiConfidenceScore: 91.8,
+    status: 'Pending Validation',
+    hpvDnaResult: 'HPV 18+',
+    gravidaPara: 'G1P1',
+    ethnicity: 'Chinese',
+    phone: '+60 16-721 4459',
+    email: 'weiling.tan@outlook.com',
+    clinicalNotesSummary: 'Routine surveillance post HPV vaccination completed 10 years ago. High risk HPV 18 detected during primary screening program.',
+    papSmearHistory: [
+      { id: 'PAP-04', date: '2026-08-25', result: 'ASC-H (Cannot exclude HSIL)', facility: 'PPUM Gynae Clinic', cytotechnologist: 'Dr. Raymond Lee' },
+      { id: 'PAP-05', date: '2023-09-14', result: 'NILM', facility: 'Subang Jaya Medical Centre', cytotechnologist: 'Dr. Tan S.H.' }
+    ]
+  },
+  {
+    id: 'PAT-2026-8843',
+    icNumber: '791102-08-5984',
+    fullName: 'Priya a/p Subramaniam',
+    age: 47,
+    assignedHospital: 'Hospital Kuala Lumpur (HKL)',
+    lastScreeningDate: '2026-09-19',
+    overallRisk: 'MODERATE_RISK',
+    aiConfidenceScore: 78.5,
+    status: 'Reviewed',
+    hpvDnaResult: 'Other High Risk HPV',
+    gravidaPara: 'G4P3',
+    ethnicity: 'Indian',
+    phone: '+60 17-890 1234',
+    email: 'priya.subra@yahoo.com',
+    clinicalNotesSummary: 'Mild persistent cervical discharge. Colposcopy showed focal thin acetowhite plaque with geographic borders at 6 oclock position.',
+    papSmearHistory: [
+      { id: 'PAP-06', date: '2026-07-15', result: 'LSIL (Low-grade)', facility: 'HKL Specialist Clinic', cytotechnologist: 'Dr. Shanti M.' },
+      { id: 'PAP-07', date: '2022-04-10', result: 'NILM', facility: 'HKL Clinic 4', cytotechnologist: 'Dr. Hazman' }
+    ]
+  },
+  {
+    id: 'PAT-2026-8844',
+    icNumber: '950518-10-5022',
+    fullName: 'Siti Sarah binti Osman',
+    age: 31,
+    assignedHospital: 'Klinik Kesihatan LPPKN',
+    lastScreeningDate: '2026-09-21',
+    overallRisk: 'LOW_RISK',
+    aiConfidenceScore: 97.4,
+    status: 'Reviewed',
+    hpvDnaResult: 'Negative',
+    gravidaPara: 'G2P2',
+    ethnicity: 'Malay',
+    phone: '+60 19-456 7810',
+    email: 'sarah.osman@gmail.com',
+    clinicalNotesSummary: 'National Cervical Screening Registry (PEKERTI) participant. Normal squamous epithelium. Transformation zone Type 1 visible, normal iodine uptake.',
+    papSmearHistory: [
+      { id: 'PAP-08', date: '2026-09-21', result: 'NILM', facility: 'Klinik Kesihatan LPPKN', cytotechnologist: 'Dr. Noraini' },
+      { id: 'PAP-09', date: '2023-06-18', result: 'NILM', facility: 'Klinik Kesihatan Bangsar', cytotechnologist: 'Dr. Salmah' }
+    ]
+  },
+  {
+    id: 'PAT-2026-8845',
+    icNumber: '830912-01-6380',
+    fullName: 'Lee Mei Hua',
+    age: 43,
+    assignedHospital: 'Hospital Sultanah Aminah JB',
+    lastScreeningDate: '2026-09-16',
+    overallRisk: 'HIGH_RISK',
+    aiConfidenceScore: 92.4,
+    status: 'Requires Biopsy',
+    hpvDnaResult: 'HPV 16/18 High Risk',
+    gravidaPara: 'G2P1',
+    ethnicity: 'Chinese',
+    phone: '+60 12-789 5543',
+    email: 'meihua.lee@gmail.com',
+    clinicalNotesSummary: 'Referred from HSAJB Polyclinic. Coarse punctation on anterior lip of cervix with sharp margin.',
+    papSmearHistory: [
+      { id: 'PAP-10', date: '2026-08-30', result: 'HSIL', facility: 'HSAJB Colposcopy Unit', cytotechnologist: 'Dr. Chew K.C.' }
+    ]
+  },
+  {
+    id: 'PAT-2026-8846',
+    icNumber: '891005-02-5318',
+    fullName: 'Fatimah Az-Zahra binti Ahmad',
+    age: 37,
+    assignedHospital: 'Hospital Kuala Lumpur (HKL)',
+    lastScreeningDate: '2026-09-21',
+    overallRisk: 'PENDING',
+    aiConfidenceScore: 64.0,
+    status: 'Pending Validation',
+    hpvDnaResult: 'Sample Inconclusive',
+    gravidaPara: 'G1P0',
+    ethnicity: 'Malay',
+    phone: '+60 13-221 9081',
+    email: 'fatimah.ahmad@gov.my',
+    clinicalNotesSummary: 'Moderate inflammation obscuring endocervical transition margin. Re-evaluating after topical antibiotic course.',
+    papSmearHistory: [
+      { id: 'PAP-11', date: '2026-09-10', result: 'Inflammatory / Reactive Changes', facility: 'HKL Clinic', cytotechnologist: 'Dr. Radzi' }
+    ]
+  },
+  {
+    id: 'PAT-2026-8847',
+    icNumber: '910814-07-5296',
+    fullName: 'Kavitha a/p Mohan',
+    age: 35,
+    assignedHospital: 'Hospital Pulau Pinang',
+    lastScreeningDate: '2026-09-17',
+    overallRisk: 'LOW_RISK',
+    aiConfidenceScore: 96.1,
+    status: 'Reviewed',
+    hpvDnaResult: 'Negative',
+    gravidaPara: 'G0P0',
+    ethnicity: 'Indian',
+    phone: '+60 14-632 9980',
+    email: 'kavitha.mohan@yahoo.com',
+    clinicalNotesSummary: 'Asymptomatic screening check. Cervix healthy with normal columnar ectropion undergoing squamous metaplasia.',
+    papSmearHistory: [
+      { id: 'PAP-12', date: '2026-09-17', result: 'NILM', facility: 'Hospital Pulau Pinang', cytotechnologist: 'Dr. Low' }
+    ]
+  },
+  {
+    id: 'PAT-2026-8848',
+    icNumber: '760421-14-5104',
+    fullName: 'Zainab binti Mat Saman',
+    age: 50,
+    assignedHospital: 'Hospital Kuala Lumpur (HKL)',
+    lastScreeningDate: '2026-09-15',
+    overallRisk: 'HIGH_RISK',
+    aiConfidenceScore: 95.7,
+    status: 'Requires Biopsy',
+    hpvDnaResult: 'HPV 16+',
+    gravidaPara: 'G5P4',
+    ethnicity: 'Malay',
+    phone: '+60 12-443 2198',
+    email: 'zainab.ms@gmail.com',
+    clinicalNotesSummary: 'Postmenopausal bleeding episode. Dense opaque acetowhite lesion extending into endocervical canal (TZ Type 3).',
+    papSmearHistory: [
+      { id: 'PAP-13', date: '2026-08-20', result: 'HSIL / Severe Dysplasia', facility: 'HKL', cytotechnologist: 'Dr. Farah Hanim' },
+      { id: 'PAP-14', date: '2020-02-14', result: 'ASC-US', facility: 'Klinik Sentul', cytotechnologist: 'Dr. Azman' }
+    ]
+  },
+  {
+    id: 'PAT-2026-8849',
+    icNumber: '980129-10-6188',
+    fullName: 'Chloe Ng Xin Yi',
+    age: 28,
+    assignedHospital: 'Pusat Perubatan Universiti Malaya (PPUM)',
+    lastScreeningDate: '2026-09-22',
+    overallRisk: 'LOW_RISK',
+    aiConfidenceScore: 98.2,
+    status: 'Reviewed',
+    hpvDnaResult: 'Negative',
+    gravidaPara: 'G0P0',
+    ethnicity: 'Chinese',
+    phone: '+60 17-312 8841',
+    email: 'chloeng.xy@gmail.com',
+    clinicalNotesSummary: 'First routine cervical screening. Completed Gardasil-9 vaccination series. Squamous mucosa pristine.',
+    papSmearHistory: [
+      { id: 'PAP-15', date: '2026-09-22', result: 'NILM', facility: 'PPUM', cytotechnologist: 'Dr. Chong' }
+    ]
+  },
+  {
+    id: 'PAT-2026-8850',
+    icNumber: '870304-05-5512',
+    fullName: 'Norhaslinda binti Hashim',
+    age: 39,
+    assignedHospital: 'Klinik Kesihatan LPPKN',
+    lastScreeningDate: '2026-09-18',
+    overallRisk: 'MODERATE_RISK',
+    aiConfidenceScore: 81.3,
+    status: 'Pending Validation',
+    hpvDnaResult: 'Other High Risk HPV',
+    gravidaPara: 'G3P3',
+    ethnicity: 'Malay',
+    phone: '+60 18-912 3441',
+    email: 'haslinda.h@gmail.com',
+    clinicalNotesSummary: 'Thin acetowhite reaction with irregular feathering at 3-5 oclock. Transformation zone partially visible.',
+    papSmearHistory: [
+      { id: 'PAP-16', date: '2026-08-11', result: 'LSIL', facility: 'LPPKN Petaling', cytotechnologist: 'Dr. Rohaya' }
+    ]
+  },
+  {
+    id: 'PAT-2026-8851',
+    icNumber: '840615-10-5290',
+    fullName: 'Ananthi a/p Rajendran',
+    age: 42,
+    assignedHospital: 'Hospital Kuala Lumpur (HKL)',
+    lastScreeningDate: '2026-09-14',
+    overallRisk: 'HIGH_RISK',
+    aiConfidenceScore: 93.6,
+    status: 'Requires Biopsy',
+    hpvDnaResult: 'HPV 18+',
+    gravidaPara: 'G2P2',
+    ethnicity: 'Indian',
+    phone: '+60 11-2309 8812',
+    email: 'ananthi.r@gmail.com',
+    clinicalNotesSummary: 'Prominent mosaic vascular pattern with rapid dense acetowhitening under 3% acetic acid. Swede score calculated at 7.',
+    papSmearHistory: [
+      { id: 'PAP-17', date: '2026-08-05', result: 'HSIL', facility: 'HKL', cytotechnologist: 'Dr. Zuraida' }
+    ]
+  },
+  {
+    id: 'PAT-2026-8852',
+    icNumber: '931201-08-5604',
+    fullName: 'Ong Shu Qi',
+    age: 32,
+    assignedHospital: 'Hospital Pulau Pinang',
+    lastScreeningDate: '2026-09-19',
+    overallRisk: 'LOW_RISK',
+    aiConfidenceScore: 97.9,
+    status: 'Reviewed',
+    hpvDnaResult: 'Negative',
+    gravidaPara: 'G1P1',
+    ethnicity: 'Chinese',
+    phone: '+60 16-432 1098',
+    email: 'shuqi.ong@gmail.com',
+    clinicalNotesSummary: 'Postnatal 6-month checkup. Well epithelized ectocervix, no lesions identified.',
+    papSmearHistory: [
+      { id: 'PAP-18', date: '2026-09-19', result: 'NILM', facility: 'HPP', cytotechnologist: 'Dr. Khor' }
+    ]
+  },
+  {
+    id: 'PAT-2026-8853',
+    icNumber: '900822-14-5390',
+    fullName: 'Mastura binti Kamaruddin',
+    age: 36,
+    assignedHospital: 'Klinik Kesihatan LPPKN',
+    lastScreeningDate: '2026-09-20',
+    overallRisk: 'MODERATE_RISK',
+    aiConfidenceScore: 76.9,
+    status: 'Pending Validation',
+    hpvDnaResult: 'Other High Risk HPV',
+    gravidaPara: 'G2P2',
+    ethnicity: 'Malay',
+    phone: '+60 19-331 4055',
+    email: 'mastura.k@gmail.com',
+    clinicalNotesSummary: 'Acetowhite changes noted near squamocolumnar border. Lugols iodine reveals partial mottling.',
+    papSmearHistory: [
+      { id: 'PAP-19', date: '2026-08-19', result: 'ASC-US', facility: 'LPPKN', cytotechnologist: 'Dr. Maznah' }
+    ]
+  },
+  {
+    id: 'PAT-2026-8854',
+    icNumber: '820510-01-5832',
+    fullName: 'Roslinda binti Jaafar',
+    age: 44,
+    assignedHospital: 'Hospital Sultanah Aminah JB',
+    lastScreeningDate: '2026-09-12',
+    overallRisk: 'HIGH_RISK',
+    aiConfidenceScore: 96.3,
+    status: 'Requires Biopsy',
+    hpvDnaResult: 'HPV 16+',
+    gravidaPara: 'G4P3',
+    ethnicity: 'Malay',
+    phone: '+60 17-710 4429',
+    email: 'roslinda.jaafar@yahoo.com',
+    clinicalNotesSummary: 'Extensive circumferential acetowhitening with elevated margins. Directed biopsy scheduled for quadrant 1 and quadrant 3.',
+    papSmearHistory: [
+      { id: 'PAP-20', date: '2026-07-28', result: 'HSIL', facility: 'HSAJB', cytotechnologist: 'Dr. Lim S.K.' }
+    ]
+  },
+  {
+    id: 'PAT-2026-8855',
+    icNumber: '990412-10-6072',
+    fullName: 'Shalini a/p Chandran',
+    age: 27,
+    assignedHospital: 'Pusat Perubatan Universiti Malaya (PPUM)',
+    lastScreeningDate: '2026-09-21',
+    overallRisk: 'LOW_RISK',
+    aiConfidenceScore: 99.1,
+    status: 'Reviewed',
+    hpvDnaResult: 'Negative',
+    gravidaPara: 'G0P0',
+    ethnicity: 'Indian',
+    phone: '+60 12-901 2291',
+    email: 'shalini.c@gmail.com',
+    clinicalNotesSummary: 'Normal physiological finding. Cervical mucus clear, intact squamous epithelium.',
+    papSmearHistory: [
+      { id: 'PAP-21', date: '2026-09-21', result: 'NILM', facility: 'PPUM', cytotechnologist: 'Dr. Teo' }
+    ]
+  },
+  {
+    id: 'PAT-2026-8856',
+    icNumber: '861119-03-5184',
+    fullName: 'Wan Norazlina binti Wan Ismail',
+    age: 40,
+    assignedHospital: 'Hospital Kuala Lumpur (HKL)',
+    lastScreeningDate: '2026-09-17',
+    overallRisk: 'MODERATE_RISK',
+    aiConfidenceScore: 82.7,
+    status: 'Reviewed',
+    hpvDnaResult: 'Other High Risk HPV',
+    gravidaPara: 'G3P2',
+    ethnicity: 'Malay',
+    phone: '+60 13-982 7701',
+    email: 'norazlina.wi@gmail.com',
+    clinicalNotesSummary: 'Mild acetowhite cuffing at external os. Follow-up colposcopy scheduled in 6 months.',
+    papSmearHistory: [
+      { id: 'PAP-22', date: '2026-08-02', result: 'LSIL', facility: 'HKL', cytotechnologist: 'Dr. Shanti M.' }
+    ]
+  },
+  {
+    id: 'PAT-2026-8857',
+    icNumber: '940203-14-5998',
+    fullName: 'Goh Pei Ling',
+    age: 32,
+    assignedHospital: 'Pusat Perubatan Universiti Malaya (PPUM)',
+    lastScreeningDate: '2026-09-16',
+    overallRisk: 'PENDING',
+    aiConfidenceScore: 68.2,
+    status: 'Pending Validation',
+    hpvDnaResult: 'Sample Inconclusive',
+    gravidaPara: 'G1P0',
+    ethnicity: 'Chinese',
+    phone: '+60 17-645 3290',
+    email: 'peiling.goh@hotmail.com',
+    clinicalNotesSummary: 'Excess mucus noted during initial visual inspection. Image quality flagged by AI as border-case focus.',
+    papSmearHistory: [
+      { id: 'PAP-23', date: '2026-08-14', result: 'ASC-US', facility: 'PPUM', cytotechnologist: 'Dr. Tan S.H.' }
+    ]
+  },
+  {
+    id: 'PAT-2026-8858',
+    icNumber: '730815-08-5420',
+    fullName: 'Halimah binti Sulaiman',
+    age: 53,
+    assignedHospital: 'Hospital Kuala Lumpur (HKL)',
+    lastScreeningDate: '2026-09-13',
+    overallRisk: 'HIGH_RISK',
+    aiConfidenceScore: 94.8,
+    status: 'Requires Biopsy',
+    hpvDnaResult: 'HPV 16+',
+    gravidaPara: 'G4P4',
+    ethnicity: 'Malay',
+    phone: '+60 12-512 8840',
+    email: 'halimah.sulaiman@gmail.com',
+    clinicalNotesSummary: 'Atrophic postmenopausal cervix with dense opaque acetowhite lesion. Swede score 8. Directed multi-site punch biopsy required.',
+    papSmearHistory: [
+      { id: 'PAP-24', date: '2026-07-20', result: 'HSIL', facility: 'HKL Gynae-Oncology Unit', cytotechnologist: 'Dr. Farah Hanim' }
+    ]
+  },
+  {
+    id: 'PAT-2026-8859',
+    icNumber: '961028-10-5712',
+    fullName: 'Thivya a/p Maniam',
+    age: 30,
+    assignedHospital: 'Hospital Pulau Pinang',
+    lastScreeningDate: '2026-09-22',
+    overallRisk: 'LOW_RISK',
+    aiConfidenceScore: 98.7,
+    status: 'Reviewed',
+    hpvDnaResult: 'Negative',
+    gravidaPara: 'G1P1',
+    ethnicity: 'Indian',
+    phone: '+60 14-889 0021',
+    email: 'thivya.m@gmail.com',
+    clinicalNotesSummary: 'Normal routine check. Ectocervix smooth with clear glistening squamous surface.',
+    papSmearHistory: [
+      { id: 'PAP-25', date: '2026-09-22', result: 'NILM', facility: 'HPP', cytotechnologist: 'Dr. Low' }
+    ]
+  },
+  {
+    id: 'PAT-2026-8860',
+    icNumber: '850709-10-5322',
+    fullName: 'Yap Siew Ling',
+    age: 41,
+    assignedHospital: 'Hospital Kuala Lumpur (HKL)',
+    lastScreeningDate: '2026-09-15',
+    overallRisk: 'HIGH_RISK',
+    aiConfidenceScore: 93.9,
+    status: 'Pending Validation',
+    hpvDnaResult: 'HPV 16/18 High Risk',
+    gravidaPara: 'G2P2',
+    ethnicity: 'Chinese',
+    phone: '+60 16-921 5431',
+    email: 'siewling.yap@gmail.com',
+    clinicalNotesSummary: 'Atypical transformation zone with early cuffing around glandular clefts. AI detected 2 confluent lesion zones.',
+    papSmearHistory: [
+      { id: 'PAP-26', date: '2026-08-08', result: 'ASC-H', facility: 'HKL', cytotechnologist: 'Dr. Zuraida' }
+    ]
+  }
+];
+
+export const INITIAL_SCANS: Record<string, AIScanResult> = {
+  'PAT-2026-8841': {
+    scanId: 'SCN-2026-9041',
+    patientId: 'PAT-2026-8841',
+    scanDate: '2026-09-18 10:45 MYT',
+    originalImageUrl: '/scans/cervigram_pat_8841.jpg',
+    heatmapOverlayUrl: '/scans/heatmap_pat_8841.png',
+    detectedLesionCount: 2,
+    classification: 'HSIL / CIN2+ (High-grade Squamous Intraepithelial Lesion)',
+    confidenceScore: 94.2,
+    doctorNotes: 'Dense acetowhite reaction with internal coarse punctation observed at 11 to 2 oclock position across transformation zone. Strongly corroborates positive HPV 16 cytology. Urgent colposcopy-directed punch biopsy required.',
+    validatedByDoctor: 'Dr. Farah Hanim, Sp.OG (Gynae-Oncology Specialist)',
+    validatedAt: '2026-09-18 14:20 MYT',
+    validationStatus: 'CONFIRMED',
+    swedeScore: 8,
+    transformationZoneType: 'Type 1 (Fully Ectocervical)',
+    aceticAcidTimingSeconds: 75,
+    lugolsIodineStaining: 'Iodine Negative (Mustard Yellow)',
+    recommendedAction: 'Direct Punch Biopsy',
+    lesionZones: [
+      {
+        id: 'LZ-01',
+        zoneCode: 'Zone 1 (11 to 1 o\'clock)',
+        x: 48,
+        y: 36,
+        width: 24,
+        height: 22,
+        severity: 'HSIL / CIN2+',
+        confidence: 96.4,
+        acetowhiteIntensity: 'Dense / Opaque',
+        marginType: 'Sharp / Peeling',
+        vessels: 'Coarse Punctation',
+        biopsyRecommended: true,
+      },
+      {
+        id: 'LZ-02',
+        zoneCode: 'Zone 2 (2 o\'clock SCJ)',
+        x: 62,
+        y: 46,
+        width: 16,
+        height: 18,
+        severity: 'HSIL / CIN2+',
+        confidence: 89.8,
+        acetowhiteIntensity: 'Dense / Opaque',
+        marginType: 'Sharp / Peeling',
+        vessels: 'Fine Mosaic',
+        biopsyRecommended: true,
+      }
+    ]
+  },
+  'PAT-2026-8842': {
+    scanId: 'SCN-2026-9042',
+    patientId: 'PAT-2026-8842',
+    scanDate: '2026-09-20 11:15 MYT',
+    originalImageUrl: '/scans/cervigram_pat_8842.jpg',
+    heatmapOverlayUrl: '/scans/heatmap_pat_8842.png',
+    detectedLesionCount: 1,
+    classification: 'HSIL / CIN2+ (Candidate Area Detected)',
+    confidenceScore: 91.8,
+    doctorNotes: '',
+    validationStatus: 'PENDING',
+    swedeScore: 7,
+    transformationZoneType: 'Type 2 (Endocervical component visible)',
+    aceticAcidTimingSeconds: 60,
+    lugolsIodineStaining: 'Iodine Negative (Mustard Yellow)',
+    recommendedAction: 'Direct Punch Biopsy',
+    lesionZones: [
+      {
+        id: 'LZ-03',
+        zoneCode: 'Zone 1 (12 to 3 o\'clock)',
+        x: 52,
+        y: 40,
+        width: 28,
+        height: 26,
+        severity: 'HSIL / CIN2+',
+        confidence: 91.8,
+        acetowhiteIntensity: 'Dense / Opaque',
+        marginType: 'Sharp / Peeling',
+        vessels: 'Fine Mosaic',
+        biopsyRecommended: true,
+      }
+    ]
+  },
+  'PAT-2026-8843': {
+    scanId: 'SCN-2026-9043',
+    patientId: 'PAT-2026-8843',
+    scanDate: '2026-09-19 14:00 MYT',
+    originalImageUrl: '/scans/cervigram_pat_8843.jpg',
+    heatmapOverlayUrl: '/scans/heatmap_pat_8843.png',
+    detectedLesionCount: 1,
+    classification: 'LSIL / CIN1 (Low-grade Squamous Intraepithelial Lesion)',
+    confidenceScore: 78.5,
+    doctorNotes: 'Faint acetowhite plaque with feathered edges at 6 oclock. Not typical for high-grade dysplasia. Swede score 4. Plan 6-month follow-up colposcopy with repeat HPV triage.',
+    validatedByDoctor: 'Dr. Raymond Lee, Sp.OG',
+    validatedAt: '2026-09-19 16:30 MYT',
+    validationStatus: 'CONFIRMED',
+    swedeScore: 4,
+    transformationZoneType: 'Type 1 (Fully Ectocervical)',
+    aceticAcidTimingSeconds: 90,
+    lugolsIodineStaining: 'Partial Uptake',
+    recommendedAction: 'Repeat Screening in 6 Months',
+    lesionZones: [
+      {
+        id: 'LZ-04',
+        zoneCode: 'Zone 1 (5 to 7 o\'clock)',
+        x: 42,
+        y: 60,
+        width: 20,
+        height: 18,
+        severity: 'LSIL / CIN1',
+        confidence: 78.5,
+        acetowhiteIntensity: 'Faint / Translucent',
+        marginType: 'Feathered / Diffuse',
+        vessels: 'Normal / Absent',
+        biopsyRecommended: false,
+      }
+    ]
+  },
+  'PAT-2026-8844': {
+    scanId: 'SCN-2026-9044',
+    patientId: 'PAT-2026-8844',
+    scanDate: '2026-09-21 09:30 MYT',
+    originalImageUrl: '/scans/cervigram_pat_8844.jpg',
+    heatmapOverlayUrl: '/scans/heatmap_pat_8844.png',
+    detectedLesionCount: 0,
+    classification: 'Negative for Intraepithelial Lesion (Normal Cervix)',
+    confidenceScore: 97.4,
+    doctorNotes: 'Normal visual examination. Squamocolumnar junction completely visualized. No abnormal acetowhite reaction or atypical vessels.',
+    validatedByDoctor: 'Dr. Noraini binti Yusof',
+    validatedAt: '2026-09-21 11:00 MYT',
+    validationStatus: 'CONFIRMED',
+    swedeScore: 0,
+    transformationZoneType: 'Type 1 (Fully Ectocervical)',
+    aceticAcidTimingSeconds: 60,
+    lugolsIodineStaining: 'Uniform Dark Brown (Normal)',
+    recommendedAction: 'Routine 3-Year Recall',
+    lesionZones: []
+  },
+  'PAT-2026-8845': {
+    scanId: 'SCN-2026-9045',
+    patientId: 'PAT-2026-8845',
+    scanDate: '2026-09-16 15:10 MYT',
+    originalImageUrl: '/scans/cervigram_pat_8845.jpg',
+    heatmapOverlayUrl: '/scans/heatmap_pat_8845.png',
+    detectedLesionCount: 2,
+    classification: 'HSIL / CIN2+ (High-grade Suspicion)',
+    confidenceScore: 92.4,
+    doctorNotes: 'Coarse punctation and rapid opaque whitening within 25 seconds of acetic acid application. Swede score 7.',
+    validatedByDoctor: 'Dr. Chew K.C.',
+    validatedAt: '2026-09-16 17:00 MYT',
+    validationStatus: 'CONFIRMED',
+    swedeScore: 7,
+    transformationZoneType: 'Type 1 (Fully Ectocervical)',
+    aceticAcidTimingSeconds: 50,
+    lugolsIodineStaining: 'Iodine Negative (Mustard Yellow)',
+    recommendedAction: 'Direct Punch Biopsy',
+    lesionZones: [
+      {
+        id: 'LZ-05',
+        zoneCode: 'Zone 1 (12 to 2 o\'clock)',
+        x: 46,
+        y: 35,
+        width: 25,
+        height: 24,
+        severity: 'HSIL / CIN2+',
+        confidence: 93.1,
+        acetowhiteIntensity: 'Dense / Opaque',
+        marginType: 'Sharp / Peeling',
+        vessels: 'Coarse Punctation',
+        biopsyRecommended: true,
+      }
+    ]
+  }
+};
+
+export const INITIAL_AUDIT_LOGS: AuditLogEntry[] = [
+  {
+    id: 'LOG-8801',
+    timestamp: '2026-09-22 07:15:30 MYT',
+    doctorName: 'Dr. Farah Hanim, Sp.OG',
+    patientId: 'PAT-2026-8841',
+    patientName: 'Nurul Aisyah binti Razak',
+    action: 'REPORT_EXPORTED',
+    details: 'Comprehensive Cerviscan Diagnostic PDF report exported for Tumor Board Review.',
+  },
+  {
+    id: 'LOG-8802',
+    timestamp: '2026-09-21 15:40:12 MYT',
+    doctorName: 'Dr. Farah Hanim, Sp.OG',
+    patientId: 'PAT-2026-8841',
+    patientName: 'Nurul Aisyah binti Razak',
+    action: 'BIOPSY_ORDERED',
+    details: 'Ordered colposcopy-directed punch biopsy for Zone 1 and Zone 2. Priority: Urgent.',
+    previousStatus: 'Pending Validation',
+    newStatus: 'Requires Biopsy'
+  },
+  {
+    id: 'LOG-8803',
+    timestamp: '2026-09-21 11:05:00 MYT',
+    doctorName: 'Dr. Noraini binti Yusof',
+    patientId: 'PAT-2026-8844',
+    patientName: 'Siti Sarah binti Osman',
+    action: 'VALIDATION_CONFIRMED',
+    details: 'AI finding confirmed: Negative for intraepithelial lesion (CIN0). Normal routine recall.',
+    previousStatus: 'Pending Validation',
+    newStatus: 'Reviewed'
+  },
+  {
+    id: 'LOG-8804',
+    timestamp: '2026-09-20 16:35:44 MYT',
+    doctorName: 'Dr. Raymond Lee, Sp.OG',
+    patientId: 'PAT-2026-8843',
+    patientName: 'Priya a/p Subramaniam',
+    action: 'VALIDATION_CONFIRMED',
+    details: 'Confirmed LSIL / CIN1 observation. Scheduled 6-month repeat colposcopy.',
+    previousStatus: 'Pending Validation',
+    newStatus: 'Reviewed'
+  },
+  {
+    id: 'LOG-8805',
+    timestamp: '2026-09-20 09:12:20 MYT',
+    doctorName: 'System Security Protocol',
+    patientId: 'SYSTEM',
+    patientName: 'All Patients',
+    action: 'PRIVACY_MODE_TOGGLED',
+    details: 'PII de-identification mode enabled for multidisciplinary clinical presentation.',
+  }
+];
+
+export const ANALYTICS_METRICS = {
+  totalPatientsScreened: 14820,
+  highRiskDetectedPercent: 8.4,
+  pendingDoctorReviews: 14,
+  averageAiInferenceTimeSec: 1.84,
+  biopsyConcordanceRate: 96.2,
+  monthlyTrend: [
+    { month: 'Apr 2026', totalScans: 1120, positiveCases: 84, biopsiesPerformed: 76 },
+    { month: 'May 2026', totalScans: 1250, positiveCases: 98, biopsiesPerformed: 90 },
+    { month: 'Jun 2026', totalScans: 1410, positiveCases: 112, biopsiesPerformed: 104 },
+    { month: 'Jul 2026', totalScans: 1680, positiveCases: 142, biopsiesPerformed: 135 },
+    { month: 'Aug 2026', totalScans: 1950, positiveCases: 168, biopsiesPerformed: 158 },
+    { month: 'Sep 2026 (MTD)', totalScans: 1410, positiveCases: 119, biopsiesPerformed: 112 },
+  ],
+  riskDistribution: [
+    { name: 'Low Risk / Normal', value: 74, count: 10966, color: '#10B981' },
+    { name: 'Moderate / Review', value: 17.6, count: 2608, color: '#F59E0B' },
+    { name: 'High Risk / HSIL', value: 8.4, count: 1246, color: '#EF4444' },
+  ],
+  ageGroupDemographics: [
+    { ageGroup: '20 - 29', lowRisk: 3420, moderateRisk: 410, highRisk: 120 },
+    { ageGroup: '30 - 39', lowRisk: 4110, moderateRisk: 890, highRisk: 480 },
+    { ageGroup: '40 - 49', lowRisk: 2280, moderateRisk: 780, highRisk: 410 },
+    { ageGroup: '50 - 65', lowRisk: 1156, moderateRisk: 528, highRisk: 236 },
+  ],
+  hospitalPerformance: [
+    { hospital: 'Hospital Kuala Lumpur', scans: 4820, sensitivity: '98.4%', avgReviewTimeHours: 2.1 },
+    { hospital: 'Klinik Kesihatan LPPKN', scans: 3950, sensitivity: '97.9%', avgReviewTimeHours: 1.8 },
+    { hospital: 'PPUM Petaling Jaya', scans: 3100, sensitivity: '98.8%', avgReviewTimeHours: 1.4 },
+    { hospital: 'Hospital Sultanah Aminah JB', scans: 1750, sensitivity: '96.5%', avgReviewTimeHours: 3.2 },
+    { hospital: 'Hospital Pulau Pinang', scans: 1200, sensitivity: '97.2%', avgReviewTimeHours: 2.5 },
+  ]
+};
