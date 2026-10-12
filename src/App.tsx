@@ -341,6 +341,93 @@ export default function App() {
     }
   };
 
+  // Register New Patient and save directly to Supabase
+  const handleRegisterPatient = async (patientData: Omit<Patient, 'papSmearHistory'>) => {
+    const nowIso = new Date().toISOString();
+    const newPatient: Patient = {
+      ...patientData,
+      papSmearHistory: [],
+    };
+
+    // 1. Optimistic UI update in React state
+    setPatients((prev) => [newPatient, ...prev]);
+
+    // Record audit log in state
+    const newLogId = `LOG-${Date.now()}`;
+    const newLog: AuditLogEntry = {
+      id: newLogId,
+      timestamp: nowIso,
+      doctorName: 'Dr. Farah Hanim, Sp.OG',
+      patientId: newPatient.id,
+      patientName: newPatient.fullName,
+      action: 'VALIDATION_CONFIRMED',
+      details: `New patient registered: ${newPatient.fullName} (${newPatient.id}). Primary triage risk: ${newPatient.overallRisk}. Clinical notes: "${newPatient.clinicalNotesSummary}"`,
+      previousStatus: undefined,
+      newStatus: newPatient.status,
+    };
+    setAuditLogs((prev) => [newLog, ...prev]);
+
+    // 2. Persist to Supabase Database
+    try {
+      // Find hospital_id from hospitals table
+      const { data: hospData } = await supabase
+        .from('hospitals')
+        .select('id')
+        .eq('name', newPatient.assignedHospital)
+        .single();
+
+      let targetHospitalId = hospData?.id;
+      if (!targetHospitalId) {
+        // Fallback to first hospital if exact match fails
+        const { data: anyHosp } = await supabase.from('hospitals').select('id').limit(1).single();
+        targetHospitalId = anyHosp?.id;
+      }
+
+      const { error: insertErr } = await supabase
+        .from('patients')
+        .insert({
+          id: newPatient.id,
+          ic_number: newPatient.icNumber,
+          full_name: newPatient.fullName,
+          age: newPatient.age,
+          hospital_id: targetHospitalId!,
+          last_screening_date: newPatient.lastScreeningDate,
+          overall_risk: newPatient.overallRisk,
+          ai_confidence_score: newPatient.aiConfidenceScore,
+          status: newPatient.status,
+          hpv_dna_result: newPatient.hpvDnaResult,
+          gravida_para: newPatient.gravidaPara,
+          ethnicity: newPatient.ethnicity,
+          phone: newPatient.phone,
+          email: newPatient.email,
+          clinical_notes_summary: newPatient.clinicalNotesSummary,
+        });
+
+      if (insertErr) {
+        console.error('Supabase patient insert error:', insertErr);
+        throw new Error(insertErr.message);
+      }
+
+      // Insert audit log in Supabase
+      await supabase.from('audit_trail').insert({
+        id: newLogId,
+        timestamp: nowIso,
+        doctor_name: 'Dr. Farah Hanim, Sp.OG',
+        patient_id: newPatient.id,
+        patient_name: newPatient.fullName,
+        action: 'VALIDATION_CONFIRMED',
+        details: newLog.details,
+        previous_status: null,
+        new_status: newPatient.status,
+      });
+
+      console.log(`[Supabase Register Success] Patient ${newPatient.id} successfully created in database.`);
+    } catch (err: any) {
+      console.error('Database register error:', err);
+      throw err;
+    }
+  };
+
   const pendingReviewCount = patients.filter((p) => p.status === 'Pending Validation').length;
 
   return (
@@ -404,6 +491,7 @@ export default function App() {
                 privacyMode={privacyMode}
                 onNavigateToScan={handleNavigateToScan}
                 selectedHospital={selectedHospital}
+                onRegisterPatient={handleRegisterPatient}
               />
             )}
 

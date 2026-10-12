@@ -28,17 +28,20 @@ import {
   FileSpreadsheet,
   Download,
   Eye,
-  RefreshCw
+  RefreshCw,
+  UserPlus
 } from 'lucide-react';
 import { Patient, RiskSeverity, ClinicalStatus } from '../../types/patient';
 import { maskName, maskIC, getRiskBadgeClasses, getStatusBadgeClasses } from '../../lib/utils';
 import { PatientDrawer } from './PatientDrawer';
+import { RegisterPatientModal } from './RegisterPatientModal';
 
 interface PatientTableProps {
   patients: Patient[];
   privacyMode: boolean;
   onNavigateToScan: (patientId: string) => void;
   selectedHospital: string;
+  onRegisterPatient?: (patientData: Omit<Patient, 'papSmearHistory'>) => Promise<void>;
 }
 
 const columnHelper = createColumnHelper<Patient>();
@@ -48,6 +51,7 @@ export const PatientTable: React.FC<PatientTableProps> = ({
   privacyMode,
   onNavigateToScan,
   selectedHospital,
+  onRegisterPatient,
 }) => {
   const [globalFilter, setGlobalFilter] = useState('');
   const [riskFilter, setRiskFilter] = useState<string>('ALL');
@@ -56,9 +60,10 @@ export const PatientTable: React.FC<PatientTableProps> = ({
     { id: 'lastScreeningDate', desc: true }
   ]);
   
-  // Drawer state
+  // Modal & Drawer state
   const [selectedPatientId, setSelectedPatientId] = useState<string | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
 
   const selectedPatient = useMemo(() => {
     return patients.find((p) => p.id === selectedPatientId) || null;
@@ -276,6 +281,17 @@ export const PatientTable: React.FC<PatientTableProps> = ({
         </div>
 
         <div className="flex items-center gap-2">
+          {onRegisterPatient && (
+            <button
+              type="button"
+              onClick={() => setIsRegisterModalOpen(true)}
+              className="flex items-center gap-1.5 rounded-lg bg-cyan-600 px-3.5 py-1.5 text-xs font-bold text-white hover:bg-cyan-700 shadow-sm transition"
+            >
+              <UserPlus className="h-3.5 w-3.5" />
+              <span>Register New Patient</span>
+            </button>
+          )}
+
           <button
             type="button"
             onClick={() => {
@@ -482,6 +498,15 @@ export const PatientTable: React.FC<PatientTableProps> = ({
           onNavigateToScan(patientId);
         }}
       />
+
+      {/* Register New Patient Modal */}
+      {onRegisterPatient && (
+        <RegisterPatientModal
+          isOpen={isRegisterModalOpen}
+          onClose={() => setIsRegisterModalOpen(false)}
+          onRegisterPatient={onRegisterPatient}
+        />
+      )}
     </div>
   );
 };
