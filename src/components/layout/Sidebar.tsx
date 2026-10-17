@@ -3,17 +3,14 @@ import {
   LayoutDashboard,
   Users,
   ScanEye,
-  BarChart3,
   ShieldCheck,
-  Settings,
   ChevronLeft,
   ChevronRight,
   Sparkles,
-  Activity,
   Award
 } from 'lucide-react';
 
-export type NavigationTab = 'overview' | 'patients' | 'scans' | 'analytics' | 'audit' | 'settings';
+export type NavigationTab = 'overview' | 'patients' | 'scans' | 'audit';
 
 interface SidebarProps {
   currentTab: NavigationTab;
@@ -33,49 +30,32 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const navItems = [
     {
       id: 'overview' as NavigationTab,
-      label: 'Overview',
+      label: 'Overview & Analytics',
       icon: LayoutDashboard,
-      description: 'KPI metrics & trends',
     },
     {
       id: 'patients' as NavigationTab,
-      label: 'Patient Directory',
+      label: 'Patient Registry',
       icon: Users,
-      description: 'EHR database & records',
-      badge: 20,
     },
     {
       id: 'scans' as NavigationTab,
       label: 'AI Scans Workspace',
       icon: ScanEye,
-      description: 'Colposcopy & heatmap viewer',
       badge: pendingReviewCount > 0 ? `${pendingReviewCount} pending` : undefined,
       badgeColor: 'bg-rose-500 text-white',
-    },
-    {
-      id: 'analytics' as NavigationTab,
-      label: 'Clinical Analytics',
-      icon: BarChart3,
-      description: 'Epidemiology & Swede scores',
     },
     {
       id: 'audit' as NavigationTab,
       label: 'Audit & Compliance',
       icon: ShieldCheck,
-      description: 'Sign-off logs & clinical trace',
-    },
-    {
-      id: 'settings' as NavigationTab,
-      label: 'Screening Protocols',
-      icon: Settings,
-      description: 'MOH guidelines & AI settings',
     },
   ];
 
   return (
     <aside
       className={`relative flex flex-col border-r border-slate-800 bg-slate-900 text-slate-300 transition-all duration-300 select-none z-30 ${
-        isCollapsed ? 'w-18' : 'w-64'
+        isCollapsed ? 'w-18' : 'w-60'
       }`}
     >
       {/* Collapse Toggle Button */}
@@ -91,17 +71,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {/* Engine Status Banner */}
       <div className={`p-4 border-b border-slate-800/80 ${isCollapsed ? 'items-center text-center' : ''}`}>
         <div className="flex items-center gap-2.5">
-          <div className="relative flex h-3 w-3 shrink-0">
+          <div className="relative flex h-2.5 w-2.5 shrink-0">
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
-            <span className="relative inline-flex h-3 w-3 rounded-full bg-emerald-500"></span>
+            <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500"></span>
           </div>
           {!isCollapsed && (
             <div className="overflow-hidden">
-              <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-200">
-                <span>AI Model v4.2 Ready</span>
+              <div className="flex items-center gap-1.5 text-xs font-bold text-slate-200">
+                <span>CerviScan CDSS</span>
                 <Sparkles className="h-3 w-3 text-cyan-400" />
               </div>
-              <p className="text-[10px] text-slate-400 truncate">MOH Cervical Clinical Protocol</p>
+              <p className="text-[10px] text-slate-400 truncate">WHO 90-70-90 Protocol</p>
             </div>
           )}
         </div>
@@ -118,29 +98,25 @@ export const Sidebar: React.FC<SidebarProps> = ({
               type="button"
               onClick={() => onSelectTab(item.id)}
               title={isCollapsed ? item.label : undefined}
-              className={`w-full flex items-center rounded-lg px-3 py-2.5 text-xs font-medium transition group relative ${
+              className={`w-full flex items-center rounded-lg px-3 py-2.5 text-xs font-semibold transition group relative ${
                 isActive
-                  ? 'bg-cyan-500/15 text-cyan-300 font-semibold border-l-2 border-cyan-400'
+                  ? 'bg-cyan-500/15 text-cyan-300 border-l-2 border-cyan-400 shadow-xs'
                   : 'text-slate-400 hover:bg-slate-800 hover:text-slate-200'
               } ${isCollapsed ? 'justify-center' : 'justify-between'}`}
             >
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2.5">
                 <Icon
                   className={`h-4 w-4 shrink-0 transition ${
                     isActive ? 'text-cyan-400' : 'text-slate-400 group-hover:text-slate-200'
                   }`}
                 />
-                {!isCollapsed && (
-                  <div className="text-left">
-                    <div>{item.label}</div>
-                  </div>
-                )}
+                {!isCollapsed && <span>{item.label}</span>}
               </div>
 
               {!isCollapsed && item.badge && (
                 <span
-                  className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${
-                    item.badgeColor || 'bg-slate-800 text-slate-300 border border-slate-700'
+                  className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                    item.badgeColor || 'bg-slate-800 text-slate-300'
                   }`}
                 >
                   {item.badge}
@@ -153,16 +129,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
       {/* Bottom Compliance Box */}
       {!isCollapsed && (
-        <div className="p-3 mx-2 mb-3 rounded-lg border border-slate-800 bg-slate-800/40 text-[11px] text-slate-400">
-          <div className="flex items-center gap-1.5 text-slate-300 font-semibold mb-1">
-            <Award className="h-3.5 w-3.5 text-cyan-400" />
-            <span>Regulatory Certified</span>
+        <div className="p-3 mx-2 mb-3 rounded-lg border border-slate-800 bg-slate-800/40 text-[11px] text-slate-400 flex items-center gap-2">
+          <Award className="h-4 w-4 text-cyan-400 shrink-0" />
+          <div className="leading-tight">
+            <div className="font-semibold text-slate-300 text-[10px]">SaMD IEC 62304</div>
+            <div className="text-[9px] text-slate-500">MOH / LPPKN Compliant</div>
           </div>
-          <p className="text-[10px] leading-relaxed">
-            MDA Medical Device Reg. No. MDA-2025-C19
-            <br />
-            ISO 13485:2016 Certified
-          </p>
         </div>
       )}
     </aside>

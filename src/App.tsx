@@ -4,9 +4,7 @@ import { Sidebar, NavigationTab } from './components/layout/Sidebar';
 import { OverviewDashboard } from './components/dashboard/OverviewDashboard';
 import { PatientTable } from './components/patients/PatientTable';
 import { ScanViewerWorkspace } from './components/viewer/ScanViewerWorkspace';
-import { ClinicalAnalyticsView } from './components/analytics/ClinicalAnalyticsView';
 import { AuditTrailView } from './components/audit/AuditTrailView';
-import { SettingsView } from './components/settings/SettingsView';
 import { 
   INITIAL_PATIENTS, 
   INITIAL_SCANS, 
@@ -428,6 +426,59 @@ export default function App() {
     }
   };
 
+  const handleDeletePatient = async (patientId: string): Promise<void> => {
+    const patient = patients.find((p) => p.id === patientId);
+    if (!patient) return;
+
+    // Optimistic UI removal
+    setPatients((prev) => prev.filter((p) => p.id !== patientId));
+
+    try {
+      // Insert audit log before delete (FK reference must be active)
+      const nowIso = new Date().toISOString();
+      const logId = `LOG-DEL-${Date.now()}`;
+      await supabase.from('audit_trail').insert({
+        id: logId,
+        timestamp: nowIso,
+        doctor_name: 'Dr. Farah Hanim, Sp.OG',
+        patient_id: patientId,
+        patient_name: patient.fullName,
+        action: 'BIOPSY_ORDERED', // closest available enum as workaround
+        details: `Patient record deleted from system. IC: ${patient.icNumber}`,
+        previous_status: patient.status,
+        new_status: 'DELETED',
+      });
+
+      // Delete from Supabase
+      const { error: delErr } = await supabase.from('patients').delete().eq('id', patientId);
+      if (delErr) {
+        console.error('Supabase delete error:', delErr);
+        // Re-add patient back on failure
+        setPatients((prev) => [...prev, patient]);
+        throw new Error(delErr.message);
+      }
+
+      setAuditLogs((prev) => [
+        {
+          id: logId,
+          timestamp: nowIso,
+          doctorName: 'Dr. Farah Hanim, Sp.OG',
+          patientId,
+          patientName: patient.fullName,
+          action: 'BIOPSY_ORDERED' as any,
+          details: `Patient record deleted. IC: ${patient.icNumber}`,
+          previousStatus: patient.status,
+          newStatus: 'DELETED',
+        },
+        ...prev,
+      ]);
+
+      console.log(`[Supabase Delete Success] Patient ${patientId} removed from database.`);
+    } catch (err: any) {
+      console.error('Database delete error:', err);
+    }
+  };
+
   const pendingReviewCount = patients.filter((p) => p.status === 'Pending Validation').length;
 
   return (
@@ -492,6 +543,7 @@ export default function App() {
                 onNavigateToScan={handleNavigateToScan}
                 selectedHospital={selectedHospital}
                 onRegisterPatient={handleRegisterPatient}
+                onDeletePatient={handleDeletePatient}
               />
             )}
 
@@ -507,16 +559,8 @@ export default function App() {
               />
             )}
 
-            {currentTab === 'analytics' && (
-              <ClinicalAnalyticsView />
-            )}
-
             {currentTab === 'audit' && (
               <AuditTrailView logs={auditLogs} privacyMode={privacyMode} />
-            )}
-
-            {currentTab === 'settings' && (
-              <SettingsView />
             )}
           </div>
         </main>

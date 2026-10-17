@@ -4,14 +4,13 @@ import {
   AlertTriangle,
   Clock,
   Zap,
-  CheckCircle,
-  ArrowUpRight,
   TrendingUp,
   ShieldAlert,
   ArrowRight,
-  Filter,
   Microscope,
-  FileCheck
+  FileCheck,
+  Award,
+  Activity
 } from 'lucide-react';
 import {
   AreaChart,
@@ -47,15 +46,25 @@ export const OverviewDashboard: React.FC<OverviewDashboardProps> = ({
 }) => {
   const highRiskPatients = patients.filter((p) => p.overallRisk === 'HIGH_RISK');
   const pendingValidation = patients.filter((p) => p.status === 'Pending Validation');
+  const biopsyOrdered = patients.filter((p) => p.status === 'Requires Biopsy');
+
+  // Swede Score correlation with histology data (from Clinical Analytics)
+  const swedeCorrelationData = [
+    { score: '0 - 2', cin0Normal: 92, cin1Low: 7, cin2PlusHigh: 1 },
+    { score: '3 - 4', cin0Normal: 45, cin1Low: 42, cin2PlusHigh: 13 },
+    { score: '5 - 6', cin0Normal: 12, cin1Low: 28, cin2PlusHigh: 60 },
+    { score: '7 - 8', cin0Normal: 3, cin1Low: 11, cin2PlusHigh: 86 },
+    { score: '9 - 10', cin0Normal: 0, cin1Low: 4, cin2PlusHigh: 96 },
+  ];
 
   return (
     <div className="space-y-6">
-      {/* Top Welcome & Diagnostic Status Banner */}
+      {/* Top Welcome Banner */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 rounded-xl border border-slate-200 bg-white p-5 shadow-xs">
         <div>
           <div className="flex items-center gap-2">
             <h1 className="text-xl font-bold tracking-tight text-slate-900">
-              National Cervical Screening Command Dashboard
+              Cervical Screening Command & Analytics Overview
             </h1>
             <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-semibold text-emerald-800 border border-emerald-300">
               Live Clinical Feed
@@ -72,7 +81,7 @@ export const OverviewDashboard: React.FC<OverviewDashboardProps> = ({
             className="flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 shadow-xs transition"
           >
             <Users className="h-3.5 w-3.5 text-slate-500" />
-            <span>View All Patients ({patients.length})</span>
+            <span>Registry ({patients.length})</span>
           </button>
           <button
             type="button"
@@ -80,121 +89,106 @@ export const OverviewDashboard: React.FC<OverviewDashboardProps> = ({
             className="flex items-center gap-2 rounded-lg bg-cyan-600 px-3.5 py-2 text-xs font-semibold text-white hover:bg-cyan-500 shadow-xs transition"
           >
             <Microscope className="h-3.5 w-3.5" />
-            <span>Open AI Scan Workspace</span>
+            <span>AI Scan Workspace</span>
           </button>
         </div>
       </div>
 
-      {/* Metric KPI Cards (4 Grid) */}
+      {/* Metric KPI Cards (4 Compact Grid) */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {/* KPI 1 */}
-        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-xs transition hover:shadow-md">
+        <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-xs">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-              Total Patients Screened
+              Total Screened
             </span>
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-slate-100 text-slate-700">
-              <Users className="h-4.5 w-4.5" />
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 text-slate-700">
+              <Users className="h-4 w-4" />
             </div>
           </div>
-          <div className="mt-3 flex items-baseline gap-2">
-            <span className="text-2xl font-bold tracking-tight text-slate-900">
-              {ANALYTICS_METRICS.totalPatientsScreened.toLocaleString()}
-            </span>
-            <span className="flex items-center text-xs font-semibold text-emerald-600">
-              <TrendingUp className="h-3.5 w-3.5 mr-0.5" />
-              +14.2% MoM
-            </span>
+          <div className="mt-2 flex items-baseline gap-2">
+            <span className="text-2xl font-black text-slate-900">{patients.length}</span>
+            <span className="text-[11px] font-semibold text-emerald-600">Active Registry</span>
           </div>
-          <p className="mt-1 text-[11px] text-slate-500">PEKERTI National Program Year 2026</p>
+          <p className="mt-1 text-[11px] text-slate-400">Synchronized with Supabase</p>
         </div>
 
         {/* KPI 2 */}
-        <div className="rounded-xl border border-rose-200 bg-white p-5 shadow-xs transition hover:shadow-md">
+        <div className="rounded-xl border border-rose-200 bg-rose-50/30 p-4 shadow-xs">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-              High Risk Detected (HSIL+)
+            <span className="text-xs font-semibold uppercase tracking-wider text-rose-800">
+              High Risk (HSIL / CIN2+)
             </span>
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-rose-50 text-rose-600 border border-rose-100">
-              <ShieldAlert className="h-4.5 w-4.5" />
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-rose-100 text-rose-600">
+              <AlertTriangle className="h-4 w-4" />
             </div>
           </div>
-          <div className="mt-3 flex items-baseline gap-2">
-            <span className="text-2xl font-bold tracking-tight text-rose-600">
-              {ANALYTICS_METRICS.highRiskDetectedPercent}%
-            </span>
-            <span className="text-xs font-medium text-slate-600">
-              ({(1246).toLocaleString()} positive cases)
+          <div className="mt-2 flex items-baseline gap-2">
+            <span className="text-2xl font-black text-rose-600">{highRiskPatients.length}</span>
+            <span className="text-[11px] font-semibold text-rose-700">
+              ({((highRiskPatients.length / Math.max(patients.length, 1)) * 100).toFixed(0)}%)
             </span>
           </div>
-          <p className="mt-1 text-[11px] text-slate-500">CIN2 / CIN3 / Invasive Suspicion</p>
+          <p className="mt-1 text-[11px] text-rose-600/70">Urgent specialist colposcopy queue</p>
         </div>
 
         {/* KPI 3 */}
-        <div className="rounded-xl border border-amber-200 bg-white p-5 shadow-xs transition hover:shadow-md">
+        <div className="rounded-xl border border-amber-200 bg-amber-50/30 p-4 shadow-xs">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-              Pending Doctor Reviews
+            <span className="text-xs font-semibold uppercase tracking-wider text-amber-800">
+              Pending Validation
             </span>
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-50 text-amber-600 border border-amber-100">
-              <Clock className="h-4.5 w-4.5" />
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-100 text-amber-600">
+              <Clock className="h-4 w-4" />
             </div>
           </div>
-          <div className="mt-3 flex items-baseline gap-2">
-            <span className="text-2xl font-bold tracking-tight text-amber-600">
-              {pendingValidation.length}
-            </span>
-            <span className="text-xs font-semibold text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full">
-              Action Required
-            </span>
+          <div className="mt-2 flex items-baseline gap-2">
+            <span className="text-2xl font-black text-amber-600">{pendingValidation.length}</span>
+            <span className="text-[11px] font-semibold text-amber-700">Action Required</span>
           </div>
-          <p className="mt-1 text-[11px] text-slate-500">Awaiting Gynaecologist sign-off</p>
+          <p className="mt-1 text-[11px] text-amber-600/70">Awaiting specialist sign-off</p>
         </div>
 
         {/* KPI 4 */}
-        <div className="rounded-xl border border-cyan-200 bg-white p-5 shadow-xs transition hover:shadow-md">
+        <div className="rounded-xl border border-emerald-200 bg-emerald-50/30 p-4 shadow-xs">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-              Average AI Inference Speed
+            <span className="text-xs font-semibold uppercase tracking-wider text-emerald-800">
+              Biopsies / Reviewed
             </span>
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-cyan-50 text-cyan-600 border border-cyan-100">
-              <Zap className="h-4.5 w-4.5" />
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-100 text-emerald-600">
+              <FileCheck className="h-4 w-4" />
             </div>
           </div>
-          <div className="mt-3 flex items-baseline gap-2">
-            <span className="text-2xl font-bold tracking-tight text-slate-900">
-              {ANALYTICS_METRICS.averageAiInferenceTimeSec}s
-            </span>
-            <span className="text-xs font-semibold text-emerald-600">
-              Target &lt; 2.5s
-            </span>
+          <div className="mt-2 flex items-baseline gap-2">
+            <span className="text-2xl font-black text-emerald-600">{biopsyOrdered.length}</span>
+            <span className="text-[11px] font-semibold text-emerald-700">Punch Biopsy</span>
           </div>
-          <p className="mt-1 text-[11px] text-slate-500">96.2% Biopsy Histology Concordance</p>
+          <p className="mt-1 text-[11px] text-emerald-600/70">Intervention protocol active</p>
         </div>
       </div>
 
-      {/* Charts Section: Monthly Trends (2/3) & Risk Donut (1/3) */}
+      {/* Main Charts Row: Monthly Trend (2/3) & Risk Donut (1/3) */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Monthly Trend Area Chart */}
         <div className="lg:col-span-2 rounded-xl border border-slate-200 bg-white p-5 shadow-xs">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h2 className="text-sm font-bold text-slate-900">Monthly Screening Trend & Detection Volume</h2>
-              <p className="text-xs text-slate-500">Total digital colposcopies vs. AI confirmed positive anomalies</p>
+              <h2 className="text-sm font-bold text-slate-900">Screening Trend & Detection Volume</h2>
+              <p className="text-xs text-slate-500">Total digital colposcopies vs. AI confirmed anomalies</p>
             </div>
             <div className="flex items-center gap-4 text-xs">
               <div className="flex items-center gap-1.5">
                 <span className="h-2.5 w-2.5 rounded-full bg-cyan-500"></span>
-                <span className="text-slate-600 font-medium">Total Scans</span>
+                <span className="text-slate-600 font-medium">Screenings</span>
               </div>
               <div className="flex items-center gap-1.5">
                 <span className="h-2.5 w-2.5 rounded-full bg-rose-500"></span>
-                <span className="text-slate-600 font-medium">Positive Cases</span>
+                <span className="text-slate-600 font-medium">Positive (HSIL+)</span>
               </div>
             </div>
           </div>
 
-          <div className="h-68 w-full">
+          <div className="h-64 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={ANALYTICS_METRICS.monthlyTrend} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                 <defs>
@@ -225,8 +219,8 @@ export const OverviewDashboard: React.FC<OverviewDashboardProps> = ({
         <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-xs flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between mb-2">
-              <h2 className="text-sm font-bold text-slate-900">Cervical Risk Stratification</h2>
-              <span className="text-[11px] text-slate-400 font-mono">N = 14,820</span>
+              <h2 className="text-sm font-bold text-slate-900">Risk Stratification</h2>
+              <span className="text-[11px] text-slate-400 font-mono">N = {patients.length}</span>
             </div>
             <p className="text-xs text-slate-500 mb-4">AI automated classification distribution</p>
 
@@ -236,7 +230,7 @@ export const OverviewDashboard: React.FC<OverviewDashboardProps> = ({
                   <Pie
                     data={ANALYTICS_METRICS.riskDistribution}
                     innerRadius={55}
-                    outerRadius={80}
+                    outerRadius={78}
                     paddingAngle={4}
                     dataKey="value"
                   >
@@ -251,155 +245,55 @@ export const OverviewDashboard: React.FC<OverviewDashboardProps> = ({
                 </PieChart>
               </ResponsiveContainer>
               <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                <span className="text-xl font-bold text-slate-900">74.0%</span>
-                <span className="text-[10px] uppercase font-semibold text-emerald-600">Normal / Low</span>
+                <span className="text-lg font-bold text-slate-900">
+                  {highRiskPatients.length}
+                </span>
+                <span className="text-[10px] font-medium text-slate-400 uppercase">High Risk</span>
               </div>
             </div>
           </div>
 
-          <div className="space-y-2 pt-2 border-t border-slate-100">
-            {ANALYTICS_METRICS.riskDistribution.map((item) => (
-              <div key={item.name} className="flex items-center justify-between text-xs">
-                <div className="flex items-center gap-2">
-                  <span className="h-3 w-3 rounded-full" style={{ backgroundColor: item.color }} />
-                  <span className="text-slate-700 font-medium">{item.name}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="font-semibold text-slate-900">{item.value}%</span>
-                  <span className="text-slate-400 font-mono text-[11px]">({item.count.toLocaleString()})</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Age Demographics & Actionable High-Risk Patients Queue */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Age Group Demographics Bar Chart (1/3) */}
-        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-xs">
-          <h2 className="text-sm font-bold text-slate-900">Age Group Risk Demographics</h2>
-          <p className="text-xs text-slate-500 mb-4">Prevalence across age cohorts (Years)</p>
-          <div className="h-60 w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={ANALYTICS_METRICS.ageGroupDemographics} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" vertical={false} />
-                <XAxis dataKey="ageGroup" tick={{ fontSize: 11, fill: '#64748B' }} axisLine={{ stroke: '#E2E8F0' }} tickLine={false} />
-                <YAxis tick={{ fontSize: 11, fill: '#64748B' }} axisLine={{ stroke: '#E2E8F0' }} tickLine={false} />
-                <Tooltip
-                  contentStyle={{ backgroundColor: '#0F172A', borderColor: '#334155', borderRadius: '8px', color: '#fff', fontSize: '12px' }}
-                />
-                <Bar dataKey="lowRisk" fill="#10B981" name="Low Risk" radius={[2, 2, 0, 0]} />
-                <Bar dataKey="moderateRisk" fill="#F59E0B" name="Moderate" radius={[2, 2, 0, 0]} />
-                <Bar dataKey="highRisk" fill="#EF4444" name="High Risk" radius={[2, 2, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-          <div className="flex items-center justify-around pt-3 border-t border-slate-100 text-[11px] text-slate-600">
-            <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-emerald-500"></span> Low</span>
+          <div className="pt-3 border-t border-slate-100 flex items-center justify-around text-xs font-medium text-slate-600">
+            <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-emerald-500"></span> Normal</span>
             <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-amber-500"></span> Moderate</span>
             <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-rose-500"></span> High Risk</span>
           </div>
         </div>
+      </div>
 
-        {/* Immediate Specialist Review Queue (2/3) */}
-        <div className="lg:col-span-2 rounded-xl border border-slate-200 bg-white p-5 shadow-xs flex flex-col justify-between">
+      {/* Integrated Clinical Analytics Section: Swede Score Correlation */}
+      <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-xs">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4">
           <div>
-            <div className="flex items-center justify-between mb-3">
-              <div>
-                <div className="flex items-center gap-2">
-                  <h2 className="text-sm font-bold text-slate-900">Urgent Specialist Action Queue</h2>
-                  <span className="rounded-full bg-rose-100 px-2 py-0.5 text-[11px] font-bold text-rose-700 border border-rose-300">
-                    {highRiskPatients.length} High Risk Cases
-                  </span>
-                </div>
-                <p className="text-xs text-slate-500 mt-0.5">High-grade lesion cases awaiting colposcopy review or biopsy sign-off</p>
-              </div>
-              <button
-                type="button"
-                onClick={onNavigateToPatients}
-                className="text-xs font-semibold text-cyan-600 hover:text-cyan-700 flex items-center gap-1"
-              >
-                Full Patient Directory <ArrowRight className="h-3.5 w-3.5" />
-              </button>
+            <div className="flex items-center gap-2">
+              <h2 className="text-sm font-bold text-slate-900">Swede Score & Histopathology Correlation Model</h2>
+              <span className="rounded-full bg-cyan-100 px-2 py-0.5 text-[10px] font-bold text-cyan-800">
+                AUC: 0.982
+              </span>
             </div>
-
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
-                <thead className="bg-slate-50 text-slate-500 uppercase tracking-wider font-semibold border-y border-slate-200 text-[10px]">
-                  <tr>
-                    <th className="py-2.5 px-3">Patient</th>
-                    <th className="py-2.5 px-3">Age / HPV DNA</th>
-                    <th className="py-2.5 px-3">AI Confidence</th>
-                    <th className="py-2.5 px-3">Risk Assessment</th>
-                    <th className="py-2.5 px-3">Status</th>
-                    <th className="py-2.5 px-3 text-right">Workstation</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {highRiskPatients.slice(0, 4).map((p) => {
-                    const riskBadge = getRiskBadgeClasses(p.overallRisk);
-                    return (
-                      <tr key={p.id} className="hover:bg-slate-50/80 transition">
-                        <td className="py-3 px-3">
-                          <div className="font-semibold text-slate-900">
-                            {maskName(p.fullName, privacyMode)}
-                          </div>
-                          <div className="text-[11px] font-mono text-slate-400 mt-0.5">
-                            {p.id} • IC: {maskIC(p.icNumber, privacyMode)}
-                          </div>
-                        </td>
-                        <td className="py-3 px-3">
-                          <div className="font-medium text-slate-700">{p.age} yrs</div>
-                          <span className="inline-block mt-0.5 rounded px-1.5 py-0.5 text-[10px] font-semibold bg-rose-50 text-rose-700 border border-rose-200">
-                            {p.hpvDnaResult}
-                          </span>
-                        </td>
-                        <td className="py-3 px-3">
-                          <div className="flex items-center gap-2">
-                            <span className="font-bold text-slate-900">{p.aiConfidenceScore}%</span>
-                            <div className="w-16 bg-slate-100 rounded-full h-1.5 overflow-hidden">
-                              <div
-                                className="bg-rose-500 h-full rounded-full"
-                                style={{ width: `${p.aiConfidenceScore}%` }}
-                              />
-                            </div>
-                          </div>
-                          <span className="text-[10px] text-slate-400">HSIL / CIN2+</span>
-                        </td>
-                        <td className="py-3 px-3">
-                          <span
-                            className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] font-semibold ${riskBadge.bg} ${riskBadge.text} border ${riskBadge.border}`}
-                          >
-                            <span className={`h-1.5 w-1.5 rounded-full ${riskBadge.dot}`} />
-                            {riskBadge.label}
-                          </span>
-                        </td>
-                        <td className="py-3 px-3">
-                          <span className="font-medium text-slate-700">{p.status}</span>
-                        </td>
-                        <td className="py-3 px-3 text-right">
-                          <button
-                            type="button"
-                            onClick={() => onNavigateToScan(p.id)}
-                            className="inline-flex items-center gap-1 rounded-md bg-slate-900 px-2.5 py-1 text-xs font-semibold text-white hover:bg-cyan-600 transition shadow-xs"
-                          >
-                            <span>Validate Scan</span>
-                            <ArrowRight className="h-3 w-3" />
-                          </button>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
+            <p className="text-xs text-slate-500">Colposcopic Swede Score (0-10) correlated with biopsy confirmed histology</p>
           </div>
-
-          <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
-            <span>Automated AI Triage SLA: Urgent colposcopies flagged within 4 hours.</span>
-            <span className="font-semibold text-slate-700">MOH Protocol 2026</span>
+          <div className="flex items-center gap-4 text-xs font-medium">
+            <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full bg-emerald-500"></span> Normal (CIN0)</span>
+            <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full bg-amber-500"></span> Low-Grade (CIN1)</span>
+            <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full bg-rose-500"></span> High-Grade (CIN2+)</span>
           </div>
+        </div>
+
+        <div className="h-60 w-full">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={swedeCorrelationData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" vertical={false} />
+              <XAxis dataKey="score" tick={{ fontSize: 11, fill: '#64748B' }} axisLine={{ stroke: '#E2E8F0' }} tickLine={false} />
+              <YAxis unit="%" tick={{ fontSize: 11, fill: '#64748B' }} axisLine={{ stroke: '#E2E8F0' }} tickLine={false} />
+              <Tooltip
+                contentStyle={{ backgroundColor: '#0F172A', borderColor: '#334155', borderRadius: '8px', color: '#fff', fontSize: '12px' }}
+              />
+              <Bar dataKey="cin0Normal" stackId="a" fill="#10B981" name="Normal (CIN0)" />
+              <Bar dataKey="cin1Low" stackId="a" fill="#F59E0B" name="LSIL / CIN1" />
+              <Bar dataKey="cin2PlusHigh" stackId="a" fill="#EF4444" name="HSIL / CIN2+" />
+            </BarChart>
+          </ResponsiveContainer>
         </div>
       </div>
     </div>

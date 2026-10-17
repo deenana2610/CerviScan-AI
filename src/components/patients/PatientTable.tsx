@@ -29,7 +29,8 @@ import {
   Download,
   Eye,
   RefreshCw,
-  UserPlus
+  UserPlus,
+  Trash2
 } from 'lucide-react';
 import { Patient, RiskSeverity, ClinicalStatus } from '../../types/patient';
 import { maskName, maskIC, getRiskBadgeClasses, getStatusBadgeClasses } from '../../lib/utils';
@@ -42,6 +43,7 @@ interface PatientTableProps {
   onNavigateToScan: (patientId: string) => void;
   selectedHospital: string;
   onRegisterPatient?: (patientData: Omit<Patient, 'papSmearHistory'>) => Promise<void>;
+  onDeletePatient?: (patientId: string) => Promise<void>;
 }
 
 const columnHelper = createColumnHelper<Patient>();
@@ -52,6 +54,7 @@ export const PatientTable: React.FC<PatientTableProps> = ({
   onNavigateToScan,
   selectedHospital,
   onRegisterPatient,
+  onDeletePatient,
 }) => {
   const [globalFilter, setGlobalFilter] = useState('');
   const [riskFilter, setRiskFilter] = useState<string>('ALL');
@@ -242,6 +245,20 @@ export const PatientTable: React.FC<PatientTableProps> = ({
                 <Microscope className="h-3.5 w-3.5" />
                 <span>Scan</span>
               </button>
+              {onDeletePatient && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (window.confirm(`Delete patient ${patient.fullName}? This action cannot be undone.`)) {
+                      onDeletePatient(patient.id);
+                    }
+                  }}
+                  className="rounded-lg p-1.5 text-slate-400 hover:bg-rose-50 hover:text-rose-600 transition"
+                  title="Delete Patient"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              )}
             </div>
           );
         },
